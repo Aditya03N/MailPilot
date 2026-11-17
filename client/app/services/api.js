@@ -19,10 +19,12 @@ const api = axios.create({
   },
 });
 
-// Request interceptor to attach JWT token
+// Request interceptor to attach JWT token (tab-isolated sessionStorage preferred over localStorage)
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("mailpilot_token");
+    const token =
+      sessionStorage.getItem("mailpilot_token") ||
+      localStorage.getItem("mailpilot_token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -49,8 +51,12 @@ api.interceptors.response.use(
       !isAuthRequest &&
       !isAuthPage
     ) {
+      sessionStorage.removeItem("mailpilot_token");
+      sessionStorage.removeItem("mailpilot_user");
+      sessionStorage.removeItem("mailpilot_team");
       localStorage.removeItem("mailpilot_token");
       localStorage.removeItem("mailpilot_user");
+      localStorage.removeItem("mailpilot_team");
       window.location.href = "/login";
     }
     return Promise.reject(error);

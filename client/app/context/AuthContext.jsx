@@ -6,14 +6,22 @@ const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
-    const saved = localStorage.getItem('mailpilot_user');
+    const saved =
+      sessionStorage.getItem('mailpilot_user') ||
+      localStorage.getItem('mailpilot_user');
     return saved ? JSON.parse(saved) : null;
   });
   const [team, setTeam] = useState(() => {
-    const saved = localStorage.getItem('mailpilot_team');
+    const saved =
+      sessionStorage.getItem('mailpilot_team') ||
+      localStorage.getItem('mailpilot_team');
     return saved ? JSON.parse(saved) : null;
   });
-  const [token, setToken] = useState(() => localStorage.getItem('mailpilot_token'));
+  const [token, setToken] = useState(
+    () =>
+      sessionStorage.getItem('mailpilot_token') ||
+      localStorage.getItem('mailpilot_token')
+  );
   const [loading, setLoading] = useState(true);
 
   // Connect socket and join team room whenever user & team are set
@@ -25,15 +33,19 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const verifySession = async () => {
-      const storedToken = localStorage.getItem('mailpilot_token');
+      const storedToken =
+        sessionStorage.getItem('mailpilot_token') ||
+        localStorage.getItem('mailpilot_token');
       if (storedToken) {
         try {
           const res = await api.get('/auth/me');
           if (res.data.success) {
             setUser(res.data.user);
             setTeam(res.data.team);
+            sessionStorage.setItem('mailpilot_user', JSON.stringify(res.data.user));
             localStorage.setItem('mailpilot_user', JSON.stringify(res.data.user));
             if (res.data.team) {
+              sessionStorage.setItem('mailpilot_team', JSON.stringify(res.data.team));
               localStorage.setItem('mailpilot_team', JSON.stringify(res.data.team));
             }
           }
@@ -54,9 +66,13 @@ export const AuthProvider = ({ children }) => {
       setToken(res.data.token);
       setUser(res.data.user);
       setTeam(res.data.team);
+      // Save to both tab sessionStorage (isolated) and localStorage (persistence)
+      sessionStorage.setItem('mailpilot_token', res.data.token);
+      sessionStorage.setItem('mailpilot_user', JSON.stringify(res.data.user));
       localStorage.setItem('mailpilot_token', res.data.token);
       localStorage.setItem('mailpilot_user', JSON.stringify(res.data.user));
       if (res.data.team) {
+        sessionStorage.setItem('mailpilot_team', JSON.stringify(res.data.team));
         localStorage.setItem('mailpilot_team', JSON.stringify(res.data.team));
       }
       joinTeamRoom(res.data.team?.id || res.data.team?._id, res.data.user?.id || res.data.user?._id, res.data.user?.role);
@@ -70,9 +86,12 @@ export const AuthProvider = ({ children }) => {
       setToken(res.data.token);
       setUser(res.data.user);
       setTeam(res.data.team);
+      sessionStorage.setItem('mailpilot_token', res.data.token);
+      sessionStorage.setItem('mailpilot_user', JSON.stringify(res.data.user));
       localStorage.setItem('mailpilot_token', res.data.token);
       localStorage.setItem('mailpilot_user', JSON.stringify(res.data.user));
       if (res.data.team) {
+        sessionStorage.setItem('mailpilot_team', JSON.stringify(res.data.team));
         localStorage.setItem('mailpilot_team', JSON.stringify(res.data.team));
       }
       joinTeamRoom(res.data.team?.id || res.data.team?._id, res.data.user?.id || res.data.user?._id, res.data.user?.role);
@@ -81,6 +100,9 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
+    sessionStorage.removeItem('mailpilot_token');
+    sessionStorage.removeItem('mailpilot_user');
+    sessionStorage.removeItem('mailpilot_team');
     localStorage.removeItem('mailpilot_token');
     localStorage.removeItem('mailpilot_user');
     localStorage.removeItem('mailpilot_team');

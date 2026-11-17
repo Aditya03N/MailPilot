@@ -152,7 +152,7 @@ export default function App() {
           <Route
             path="/client/dashboard"
             element={
-              <ProtectedRoute allowedRoles={['client']}>
+              <ProtectedRoute allowedRoles={['client', 'assistant']}>
                 <ClientLayout>
                   <ClientDashboard />
                 </ClientLayout>
