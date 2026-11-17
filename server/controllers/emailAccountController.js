@@ -54,16 +54,17 @@ export const getGoogleAuthUrl = async (req, res, next) => {
 export const googleAuthCallback = async (req, res, next) => {
   try {
     const { code, state, error } = req.query;
+    const clientOrigin = process.env.CLIENT_URL || "http://localhost:3000";
 
     if (error) {
       return res.redirect(
-        `http://localhost:3000/client/dashboard?oauth_error=${encodeURIComponent(error)}`
+        `${clientOrigin}/client/dashboard?oauth_error=${encodeURIComponent(error)}`
       );
     }
 
     if (!code || !state) {
       return res.redirect(
-        `http://localhost:3000/client/dashboard?oauth_error=missing_code_or_state`
+        `${clientOrigin}/client/dashboard?oauth_error=missing_code_or_state`
       );
     }
 
@@ -72,7 +73,7 @@ export const googleAuthCallback = async (req, res, next) => {
       stateData = JSON.parse(Buffer.from(state, "base64").toString("utf8"));
     } catch (e) {
       return res.redirect(
-        `http://localhost:3000/client/dashboard?oauth_error=invalid_state`
+        `${clientOrigin}/client/dashboard?oauth_error=invalid_state`
       );
     }
 
