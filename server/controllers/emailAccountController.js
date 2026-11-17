@@ -251,14 +251,11 @@ export const googleAuthCallback = async (req, res, next) => {
       count: importedCount,
     });
 
-    const clientOrigin = process.env.CLIENT_URL || "http://localhost:3000";
-
     return res.redirect(
       `${clientOrigin}/client/dashboard?google_synced=true&email=${encodeURIComponent(realEmail)}&count=${importedCount}`
     );
   } catch (err) {
     console.error("OAuth callback error:", err);
-    const clientOrigin = process.env.CLIENT_URL || "http://localhost:3000";
     return res.redirect(
       `${clientOrigin}/client/dashboard?oauth_error=${encodeURIComponent(err.message)}`
     );
