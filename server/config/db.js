@@ -1,4 +1,14 @@
 import mongoose from 'mongoose';
+import dns from 'dns';
+
+// Fix for Windows DNS resolvers that fail on mongodb+srv SRV lookups
+if (process.platform === 'win32') {
+  try {
+    dns.setServers(['8.8.8.8', '1.1.1.1']);
+  } catch (e) {
+    // Ignore if not permitted
+  }
+}
 
 const connectDB = async () => {
   try {
